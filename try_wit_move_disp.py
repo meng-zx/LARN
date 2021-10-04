@@ -365,16 +365,14 @@ lock=Lock()
 x_nums = 14  # x方向上的角点个数
 y_nums = 4
 grid_len = 1.8
-world_point = np.zeros((x_nums * y_nums, 3), np.float32)  # 生成x_nums*y_nums个坐标，每个坐标包含x,y,z三个元素
-world_point[:, :2] = np.mgrid[0:x_nums:1, y_nums-1:-1:-1].T.reshape(-1, 2)  # mgrid[]生成包含两个二维矩阵的矩阵，每个矩阵都有x_nums列,y_nums行
+world_point = np.zeros((x_nums * y_nums, 3), np.float32)
+world_point[:, :2] = np.mgrid[0:x_nums:1, y_nums-1:-1:-1].T.reshape(-1, 2)
 world_point = world_point * grid_len
-    # .T矩阵的转置
-    # reshape()重新规划矩阵，但不改变矩阵元素
-    # 保存角点坐标
+
 num_frame_in_calibration = 12
 world_position = [world_point] * num_frame_in_calibration
 image_position = []
-    # 设置角点查找限制
+
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
     # world数组用来储存空间点阵信息
@@ -416,9 +414,9 @@ while (1):
 
         else:
             image_position.pop(0)
-            # 获取更精确的角点位置
+
             exact_corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            # 把获取的角点坐标放到image_position中
+
             image_position.append(exact_corners)
             ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(world_position, image_position, gray.shape[::-1],
                                                                    None,

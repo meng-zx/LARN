@@ -327,19 +327,16 @@ lock=Lock()
 x_nums = 14  # x方向上的角点个数
 y_nums = 3
 grid_len = 0.2
-world_point = np.zeros((x_nums * y_nums, 3), np.float32)  # 生成x_nums*y_nums个坐标，每个坐标包含x,y,z三个元素
-world_point[:, :2] = np.mgrid[0:x_nums:1, y_nums-1:-1:-1].T.reshape(-1, 2)  # mgrid[]生成包含两个二维矩阵的矩阵，每个矩阵都有x_nums列,y_nums行
+world_point = np.zeros((x_nums * y_nums, 3), np.float32)
+world_point[:, :2] = np.mgrid[0:x_nums:1, y_nums-1:-1:-1].T.reshape(-1, 2)
 world_point = world_point * grid_len
-    # .T矩阵的转置
-    # reshape()重新规划矩阵，但不改变矩阵元素
-    # 保存角点坐标
+
 num_frame_in_calibration = 12
 world_position = [world_point] * num_frame_in_calibration
 image_position = []
-    # 设置角点查找限制
+
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-    # world数组用来储存空间点阵信息
 world = []
 factor = 0.5
 for i in range(3):
@@ -353,7 +350,7 @@ for i in range(3):
             new_point.info = 1
             world.append(new_point)
 
-    # 设置(生成)标定图在世界坐标中的坐标
+
 cap = cv2.VideoCapture(0)
 ret, frame = cap.read()
 height = frame.shape[0]
@@ -375,16 +372,16 @@ while (1):
     if is_grid:
         if len(image_position) < num_frame_in_calibration:
 
-            # 获取更精确的角点位置
+
             exact_corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            # 把获取的角点坐标放到image_position中
+
             image_position.append(exact_corners)
 
         else:
             image_position.pop(0)
-            # 获取更精确的角点位置
+
             exact_corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            # 把获取的角点坐标放到image_position中
+
             image_position.append(exact_corners)
             ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(world_position, image_position, gray.shape[::-1],
                                                                    None,
@@ -399,11 +396,11 @@ while (1):
             #     tot_error += error
             # print(tot_error/num_frame_in_calibration)
 
-            # 返回一个点的图像坐标
+
             lock.acquire()
             for i in world:
                 if i.info != 0:
-                    # 三维坐标转化为二维图像坐标
+
                     grid_coordinate_point = get_point_grid_pos([i.world_x, i.world_y, i.world_z], probe)
                     p_test = np.zeros((1, 3), np.float32)
                     p_test[0][0] = grid_coordinate_point[0]
